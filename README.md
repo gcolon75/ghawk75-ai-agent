@@ -1,106 +1,43 @@
-# Ghawk75 AI Agent
+# Ghawk75 AI Agent — DeskSentinel (Windows)
 
-This repository contains the source code for **DeskSentinel**, a modular agent designed to run
-continuously on your personal computer (or a small server) and monitor both stock
-prices and video game deals.  It delivers real‑time alerts to Discord and
-produces daily summaries using a cloud language model.
+An always-on desktop agent that watches **stocks** and **video game deals**, stores data in **CSV** (human-readable), keeps **permanent highs/lows**, and pings you on **Discord**. Includes **Polygon stocks + options**, **NVDA-only options** (ATM ±1 to nearest Friday) for testing, **quiet hours**, **cooldowns**, and **morning (7:30am PT) / evening (10:00pm PT)** briefs. Comes with a **Task Scheduler** XML for run-on-logon. On startup it posts a **✅ DeskSentinel is online** ping to your Discord.
 
-## Features
-
-* **Real‑time stock monitoring** – Watches a configurable list of tickers via a
-  market data API (e.g. Polygon, IEX Cloud, Alpaca).  Maintains rolling price
-  history, computes common technical indicators (RSI, moving averages, MACD,
-  VWAP) and records all‑time highs/lows.
-* **Game deal tracking** – Polls multiple storefront APIs (Steam, Ubisoft
-  Connect, EA/Origin, Epic Games Store, G2A) and cross‑references historical
-  pricing to identify notable discounts, new lows and bundle opportunities.
-* **Rule engine** – Defines flexible conditions for alerting on price changes
-  and technical signals.  Supports per‑ticker thresholds, crossovers, percent
-  moves and quiet hours with deduplication.
-* **Discord notifications** – Sends rich messages to a webhook, including
-  contextual data such as current price, percent change, all‑time high/low,
-  suggested support/resistance levels or best 12‑month deal.
-* **Daily briefs** – Summarises the day’s activity every morning and evening
-  using a cloud LLM.  Includes P&L from the built‑in paper trading account and
-  highlights potential plays.
-* **Paper trading** – Simulates trades based on the agent’s recommendations to
-  allow backtesting strategies before risking real capital.  Tracks equity
-  curve and win rate.
-* **Local dashboard** – Provides a simple web interface to view live prices,
-  configure alerts, review the alert log and inspect game deal history.  Only
-  bound to `localhost` by default.
-
-## Getting Started
-
-### Prerequisites
-
-* Python 3.10 or newer
-* Docker and Docker Compose (optional, recommended for ease of deployment)
-* A Discord webhook URL
-* API keys for your chosen market data provider (e.g. Polygon or IEX) and
-  IsThereAnyDeal (for game pricing)
-
-### Installation
-
-Clone this repository and install the required dependencies:
-
-```
-git clone https://github.com/Ghawk75/ghawk75-ai-agent.git
-cd ghawk75-ai-agent
+---
+## Quick Start (Windows)
+1. Install Python **3.11+** (check “Add Python to PATH”).
+2. Open PowerShell in the project folder and run:
+```powershell
 python -m venv .venv
-source .venv/bin/activate
+.\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
+copy .env.example .env
+```
+3. Edit `.env` (Discord webhook or bot, POLYGON key, etc.).
+4. Run:
+```powershell
+python -m desk_sentinel.cli
+# or headless:
+python -m desk_sentinel.agent
 ```
 
-Create a `.env` file in the project root and populate it with your secrets.  An
-example is provided in `.env.example`:
+---
+## What it does
+- **Stocks**: polls watchlist; logs prices, computes SMA20/50, RSI14; alerts & keeps all-time high/low.
+- **Options**: NVDA-only by default; monitors **nearest Friday** ATM ±1 strikes via Polygon; posts contract updates; simple paper-trade entries.
+- **Games**: optional IsThereAnyDeal (ITAD) integration to track multi-store deals.
+- **Briefs**: 7:30am and 10:00pm PT summaries to Discord.
+- **Hygiene**: quiet hours (default 23:00–07:00), per-alert cooldown, dedupe.
+- **Startup ping**: sends a message to Discord immediately when the agent launches.
 
-```
-# .env
-DISCORD_WEBHOOK_URL=your-discord-webhook-url
-MARKET_DATA_API_KEY=your-market-data-api-key
-IS_THERE_ANY_DEAL_API_KEY=your-itad-api-key
-TIMEZONE=America/Los_Angeles
-WATCHLIST=NVDA,QUBT,PLTR,LMT,JPM,AAPL
-```
+---
+## Files created (in `data/`)
+- `prices.csv`, `signals.csv`, `alerts.csv`, `paper_trades.csv`, `game_prices.csv`
+- `extrema.json` (permanent highs/lows)
 
-To run the agent locally:
+---
+## Run on Logon (Task Scheduler)
+Import `windows-task-DeskSentinel.xml` in Task Scheduler → set **Start in** to your project folder.
 
-```
-python -m sentinel_core.main
-```
-
-To run using Docker Compose:
-
-```
-docker compose up -d
-```
-
-## Repository Structure
-
-```
-ghawk75_ai_agent/
-├── docker-compose.yml     # Container definitions for core, web and worker
-├── requirements.txt       # Python dependencies
-├── README.md              # This document
-└── sentinel_core/         # Core application package
-    ├── __init__.py
-    ├── database.py        # SQLite schema and helper functions
-    ├── game_watcher.py    # Game price crawling and rules
-    ├── stock_watcher.py   # Stock price streaming and rules
-    ├── rules.py           # Alert definitions and evaluation logic
-    └── main.py            # Entry point and orchestration
-```
-
-## Contributing
-
-Pull requests are welcome!  Please open an issue first to discuss what you
-would like to change.  For major changes, please open an issue to propose
-changes and ensure they fit within the scope of this project.
-
-## Disclaimer
-
-This software is provided for educational and personal use only.  It does
-**not** constitute financial advice.  Trading stocks carries risk and you
-should consult a qualified financial advisor before making any investment
-decisions.
+---
+## Notes
+- Default watchlist: `NVDA,QUBT,PLTR,LMT,JPM,AAPL` (stocks; options watcher is **NVDA only**).

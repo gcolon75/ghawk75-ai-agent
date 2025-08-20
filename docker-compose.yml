@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  sentinel-core:
+    build: .
+    command: python -m sentinel_core.main
+    env_file:
+      - .env
+    volumes:
+      - ./sentinel_core:/app/sentinel_core:ro
+      - ./data:/app/data
+    restart: unless-stopped
+
+  sentinel-web:
+    build: .
+    command: uvicorn sentinel_core.web:app --host 0.0.0.0 --port 8080
+    env_file:
+      - .env
+    volumes:
+      - ./sentinel_core:/app/sentinel_core:ro
+      - ./data:/app/data
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+
+  sentinel-worker:
+    build: .
+    command: python -m sentinel_core.worker
+    env_file:
+      - .env
+    volumes:
+      - ./sentinel_core:/app/sentinel_core:ro
+      - ./data:/app/data
+    restart: unless-stopped
+
+  # The builder stage uses the same image for all services to simplify caching.  A
+  # Dockerfile is not provided yet; by default it uses the python:3.11 image.

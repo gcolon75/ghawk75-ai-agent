@@ -1,0 +1,10 @@
+aiohttp
+requests
+discord-webhook
+python-dotenv
+fastapi
+uvicorn
+pydantic
+pandas
+sqlalchemy
+tenacity

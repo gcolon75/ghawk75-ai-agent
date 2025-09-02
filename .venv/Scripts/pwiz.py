@@ -1,4 +1,4 @@
-#!C:\Users\ghawk\OneDrive\Documents\GitHub\ghawk75-ai-agent\.venv\Scripts\python.exe
+#!C:\Users\ghawk\Documents\GitHub\ghawk75-ai-agent\.venv\Scripts\python.exe
 
 import datetime
 import os
